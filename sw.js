@@ -6,7 +6,7 @@
 // (so updates show up straight away) and refresh the saved copy.
 // When offline, use the saved copy instead.
 
-const CACHE_NAME = "speed-reader-v2";
+const CACHE_NAME = "speed-reader-v3";
 
 // Everything the app needs to start
 const APP_FILES = [
@@ -27,7 +27,10 @@ const APP_FILES = [
 // First install: save all the app files
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_FILES))
+    caches.open(CACHE_NAME).then((cache) =>
+      // "reload": download fresh copies, never ones the browser kept from before
+      cache.addAll(APP_FILES.map((file) => new Request(file, { cache: "reload" })))
+    )
   );
   self.skipWaiting(); // start working straight away
 });
@@ -50,7 +53,11 @@ self.addEventListener("fetch", (event) => {
   if (new URL(event.request.url).origin !== self.location.origin) return;
 
   event.respondWith(
-    fetch(event.request)
+    // "no-cache": always ask GitHub whether the file changed, instead of
+    // reusing a copy the browser kept for a few minutes. Otherwise a phone
+    // can mix a new index.html with an old reader.js right after an update.
+    // (If nothing changed, GitHub answers "same as before", which is quick.)
+    fetch(event.request.url, { cache: "no-cache" })
       .then((response) => {
         // Keep the saved copy up to date (only for good answers)
         if (response.ok) {
