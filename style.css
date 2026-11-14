@@ -165,17 +165,25 @@ input[type="range"] { accent-color: var(--accent); }
 #context-toggle[aria-pressed="true"] { border-color: var(--accent); }
 
 
-/* ---------- Paused view: the whole chapter, scrollable ---------- */
+/* ---------- Paused: chapter text under the frozen word ---------- */
 
 /* The reading screen is exactly one window tall, so the chapter text
-   scrolls inside the middle area instead of making the page longer */
+   scrolls inside its own box instead of making the page longer */
 #reader-screen { height: 100vh; }
-.stage { min-height: 0; }
+.stage {
+  min-height: 0;
+  position: relative; /* the text box below is placed inside the stage */
+}
 
+/* The text is a separate layer that fills the space below the word.
+   Being a layer, it never pushes the word up when it appears. */
 .peek-view {
-  width: 100%;
-  max-width: 720px;
-  height: 100%;
+  position: absolute;
+  top: calc(50% + 100px); /* just below the word and its hint line */
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(720px, 100% - 32px);
   display: flex;
   flex-direction: column;
 }
@@ -183,15 +191,32 @@ input[type="range"] { accent-color: var(--accent); }
 .peek-text {
   flex: 1;
   overflow-y: auto;
-  padding-right: 8px;
+  position: relative; /* so word positions are measured from this box */
+  padding: 0 8px 0 0;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: 20px;
+  font-size: 17px;
   line-height: 1.7;
-  color: #b5b5b5;
+  color: #7a7a7a;
   scrollbar-color: var(--faint) transparent; /* dark scrollbar */
+  /* Fade the top and bottom edges so the text melts into the background */
+  mask-image: linear-gradient(transparent, black 20%, black 80%, transparent);
 }
 
 .peek-text p { margin: 0 0 1em; }
+
+/* The text fades in each time you pause.
+   Only the opacity changes, nothing moves. */
+@keyframes text-appear {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.peek-view:not([hidden]) { animation: text-appear 300ms ease-out; }
+
+/* People who turned on "reduce motion" in their system get no fade */
+@media (prefers-reduced-motion: reduce) {
+  .peek-view:not([hidden]) { animation: none; }
+}
 
 .peek-text span { cursor: pointer; border-radius: 3px; }
 .peek-text span:hover { color: var(--text); }
@@ -205,6 +230,15 @@ input[type="range"] { accent-color: var(--accent); }
 }
 
 .hint { color: var(--muted); text-align: center; }
+
+/* Always keeps its height, even when empty while reading,
+   so the word never moves up or down when you pause */
+.word-hint {
+  min-height: 1.5em;
+  margin: 8px 0 0;
+  color: #5c5c5c;
+  font-size: 14px;
+}
 
 
 /* ---------- Footer ---------- */

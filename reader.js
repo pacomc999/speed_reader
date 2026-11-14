@@ -30,7 +30,7 @@ const el = {
   longWordValue: document.getElementById("long-word-value"),
   peekView: document.getElementById("peek-view"),
   peekText: document.getElementById("peek-text"),
-  peekHint: document.getElementById("peek-hint"),
+  wordHint: document.getElementById("word-hint"),
   progressFill: document.getElementById("progress-fill"),
   status: document.getElementById("status"),
 };
@@ -174,7 +174,7 @@ function nextWord() {
     } else {
       state.index = state.words.length - 1;
       pause();
-      el.peekHint.textContent = "The end. Well done!";
+      el.wordHint.textContent = "The end. Well done!";
       return;
     }
   }
@@ -224,13 +224,17 @@ function setSpeed(wordsPerMinute) {
 
 // ---------- Drawing the screen ----------
 
+// Reading: just the flashing word.
+// Paused: the word stays frozen in place, and the chapter text
+// appears underneath it (scrollable, current word highlighted).
 function render() {
   el.readerScreen.classList.toggle("playing", state.playing);
-  el.wordView.hidden = !state.playing;
   el.peekView.hidden = state.playing;
 
-  if (state.playing) renderWord();
-  else renderPeek();
+  renderWord();
+  if (!state.playing) renderPeek();
+
+  el.wordHint.textContent = state.playing ? "" : "Paused · Space to continue";
   renderStatus();
 }
 
@@ -285,17 +289,19 @@ function buildPeekText() {
   peek.highlighted = null;
 }
 
-// Highlights the current word and scrolls it to the middle.
-// Clicking any word jumps there.
+// Highlights the current word and scrolls the text so it sits in the
+// middle of the text box. Clicking any word jumps there.
 function renderPeek() {
   if (peek.builtFor !== state.words) buildPeekText();
 
   if (peek.highlighted) peek.highlighted.classList.remove("current");
   peek.highlighted = peek.spans[state.index];
   peek.highlighted.classList.add("current");
-  peek.highlighted.scrollIntoView({ block: "center" });
 
-  el.peekHint.textContent = "Scroll or click a word, then press Space to read from the highlighted word";
+  // Scroll only the text box. (The browser's scrollIntoView could also
+  // nudge the rest of the screen, which would move the frozen word.)
+  const box = el.peekText;
+  box.scrollTop = peek.highlighted.offsetTop - box.clientHeight / 2;
 }
 
 // Progress bar and "time left" line
