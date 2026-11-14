@@ -1,0 +1,204 @@
+/* ---------- Colours and basics ---------- */
+:root {
+  --background: #121212;
+  --panel: #1c1c1c;
+  --text: #e8e8e8;
+  --muted: #8a8a8a;
+  --faint: #3a3a3a;
+  --accent: #e5484d; /* the focus letter colour */
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--text);
+  font-family: system-ui, sans-serif;
+}
+
+.screen {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.screen[hidden] { display: none; }
+
+
+/* ---------- Start screen ---------- */
+#start-screen {
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 16px;
+}
+
+h1 { font-weight: 500; letter-spacing: 1px; }
+
+.drop-zone {
+  width: min(520px, 100%);
+  padding: 56px 24px;
+  border: 2px dashed var(--faint);
+  border-radius: 12px;
+  text-align: center;
+  color: var(--muted);
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+/* Only colours change on hover or drag, nothing moves */
+.drop-zone:hover,
+.drop-zone.dragging {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.message { color: var(--accent); min-height: 1.2em; }
+
+
+/* ---------- Top toolbar ---------- */
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+  padding: 12px 16px;
+  background: var(--panel);
+  transition: opacity 0.4s;
+}
+
+/* Fade the toolbar while playing so only the word gets attention */
+.playing .toolbar { opacity: 0.15; }
+.playing .toolbar:hover { opacity: 1; }
+
+.book-title {
+  font-weight: 600;
+  margin-right: auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+select, button {
+  background: var(--background);
+  color: var(--text);
+  border: 1px solid var(--faint);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font: inherit;
+  max-width: 100%;
+}
+
+button { cursor: pointer; transition: border-color 0.2s; }
+button:hover { border-color: var(--accent); }
+
+.speed, .timing { display: flex; align-items: center; gap: 8px; color: var(--muted); }
+input[type="range"] { accent-color: var(--accent); }
+
+
+/* ---------- The stage in the middle ---------- */
+.stage {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.word-view {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.word-view[hidden], .peek-view[hidden] { display: none; }
+
+/* Small fixed marks above and below the focus letter */
+.guide { width: 2px; height: 14px; background: var(--faint); }
+
+/* Three columns: the middle one (focus letter) is always centred,
+   the left part hugs it from the left, the right part from the right */
+.word {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: baseline; /* all three parts sit on the same text line */
+  min-height: 1.3em;     /* keeps its height when the screen goes blank */
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(36px, 7vw, 64px);
+  white-space: pre;
+}
+
+/* Left and right parts are flex rows so that extra context text spills
+   off the OUTER edges (and gets cut off there), never pushing the
+   focus letter out of place */
+.word .before,
+.word .after {
+  display: flex;
+  align-items: baseline;
+  min-width: 0;
+  overflow: hidden;
+}
+.word .before { justify-content: flex-end; }
+.word .after { justify-content: flex-start; }
+.word .focus { color: var(--accent); }
+
+/* The neighbouring words: same size as the main word, but dim,
+   so the eye stays on the bright word in the middle */
+.context {
+  color: #4d4d4d;
+  flex-shrink: 0;
+}
+.before .context { margin-right: 0.4em; }
+.after .context { margin-left: 0.4em; }
+
+/* Toolbar button looks "on" when context is enabled */
+#context-toggle[aria-pressed="true"] { border-color: var(--accent); }
+
+
+/* ---------- Paused view: the whole paragraph ---------- */
+.peek-view { max-width: 720px; }
+
+.peek-text {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 20px;
+  line-height: 1.7;
+  color: #b5b5b5;
+}
+
+.peek-text span { cursor: pointer; border-radius: 3px; }
+.peek-text span:hover { color: var(--text); }
+
+.peek-text .current {
+  background: var(--accent);
+  color: #fff;
+  padding: 0 3px;
+}
+
+.hint { color: var(--muted); text-align: center; }
+
+
+/* ---------- Footer ---------- */
+.footer { padding: 12px 16px 20px; text-align: center; }
+
+.progress {
+  height: 4px;
+  background: var(--faint);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--accent);
+}
+
+.status { color: var(--muted); font-size: 14px; }
+.keys { color: #5c5c5c; font-size: 12px; margin: 0; }

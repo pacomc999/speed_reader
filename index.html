@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Speed Reader</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Screen 1: pick a book -->
+  <section id="start-screen" class="screen">
+    <h1>Speed Reader</h1>
+    <label id="drop-zone" class="drop-zone">
+      <input id="file-input" type="file" accept=".epub,application/epub+zip" hidden>
+      <span>Drop an EPUB file here, or click to choose one</span>
+    </label>
+    <p id="start-message" class="message"></p>
+  </section>
+
+  <!-- Screen 2: reading -->
+  <section id="reader-screen" class="screen" hidden>
+
+    <!-- Top bar: book, chapter and speed controls -->
+    <header id="toolbar" class="toolbar">
+      <span id="book-title" class="book-title"></span>
+      <select id="chapter-select" aria-label="Chapter"></select>
+      <label class="speed">
+        <input id="speed-slider" type="range" min="100" max="1000" step="25" value="300">
+        <span id="speed-value">300 wpm</span>
+      </label>
+      <label class="speed" title="Extra time for each letter past 5 (Ours timing only)">
+        Long words
+        <input id="long-word-slider" type="range" min="0" max="30" step="1" value="12">
+        <span id="long-word-value">+12%</span>
+      </label>
+      <label class="timing">
+        Timing
+        <select id="timing-select">
+          <option value="ours">Ours</option>
+          <option value="openspritz">OpenSpritz</option>
+        </select>
+      </label>
+      <button id="context-toggle" type="button" aria-pressed="false">Context: off</button>
+      <button id="open-another" type="button">Open another book</button>
+    </header>
+
+    <!-- Middle: the flashing word, or the paragraph when paused -->
+    <main id="stage" class="stage">
+      <div id="word-view" class="word-view" hidden>
+        <div class="guide"></div>
+        <!-- Left part (with the previous word), focus letter, right part (with the next word) -->
+        <div class="word">
+          <span class="before"><span id="context-left" class="context"></span><span id="word-before"></span></span><span id="word-focus" class="focus"></span><span class="after"><span id="word-after"></span><span id="context-right" class="context"></span></span>
+        </div>
+        <div class="guide"></div>
+      </div>
+      <div id="peek-view" class="peek-view">
+        <p id="peek-text" class="peek-text"></p>
+        <p id="peek-hint" class="hint"></p>
+      </div>
+    </main>
+
+    <!-- Bottom: progress and keyboard help -->
+    <footer class="footer">
+      <div class="progress"><div id="progress-fill" class="progress-fill"></div></div>
+      <p id="status" class="status"></p>
+      <p class="keys">
+        Space: play or pause · Left and Right: jump back or forward · Shift + Left: back a sentence · Up and Down: speed · C: context words · T: timing
+      </p>
+    </footer>
+  </section>
+
+  <!-- Scripts load in this order: helpers first, the app last -->
+  <script src="epub.js"></script>
+  <script src="words.js"></script>
+  <script src="storage.js"></script>
+  <script src="reader.js"></script>
+</body>
+</html>

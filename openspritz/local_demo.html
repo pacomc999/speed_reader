@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<!--
+  local_demo.html (added by us, not part of OpenSpritz)
+  Runs the original OpenSpritz reader locally, for comparing with speed_reader.
+  The original spritz.js is used unchanged, but we skip two of its parts:
+   - create_spritz(): it downloads this layout from cdn.rawgit.com, which shut down
+   - spritz(): with no text selected it sends the page address to an outside
+     service (Diffbot), so we call spritzify(text) directly instead
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>OpenSpritz local demo</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* OpenSpritz lines words up with a monospace font. Its font (Droid Sans Mono)
+       came from the internet, so fall back to monospace fonts already on Windows */
+    #spritz_result, #guide_top, #guide_bottom, #notch, .invisible,
+    .spritz_start, .spritz_pivot, .spritz_end {
+      font-family: 'Droid Sans Mono', Consolas, 'Courier New', monospace;
+    }
+
+    /* Our extra controls below the reader */
+    .demo-controls {
+      max-width: 720px;
+      margin: 24px auto;
+      padding: 0 16px;
+      font-family: system-ui, sans-serif;
+    }
+    .demo-controls textarea { width: 100%; height: 220px; font: 15px/1.5 Georgia, serif; }
+    .demo-controls .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 10px 0; }
+    .demo-controls select { max-width: 100%; }
+  </style>
+</head>
+<body>
+
+  <!-- The reader layout, copied from OpenSpritz's spritz.html -->
+  <div id="spritz_holder">
+    <div id="spritz_container">
+      <div id="guide_top">――――――――――<span id="notch">&#1092;</span>―――――――――――</div>
+      <div id="spritz_result">Paste text or open an EPUB below, then press Read.</div>
+      <div id="guide_bottom">――――――――――――――――――――――</div>
+      <select id="spritz_selector">
+        <option value="200">200wpm</option>
+        <option value="300" selected>300wpm</option>
+        <option value="350">350wpm</option>
+        <option value="400">400wpm</option>
+        <option value="450">450wpm</option>
+        <option value="500">500wpm</option>
+        <option value="550">550wpm</option>
+        <option value="600">600wpm</option>
+        <option value="700">700wpm</option>
+        <option value="800">800wpm</option>
+      </select>
+      <button type="button" id="spritz_toggle" style="display:none">Pause</button>
+    </div>
+  </div>
+  <div id="spritz_spacer"></div>
+
+  <!-- Our controls: text to read, and an EPUB chapter picker -->
+  <div class="demo-controls">
+    <div class="row">
+      <label>Open an EPUB: <input id="epub-input" type="file" accept=".epub"></label>
+      <select id="chapter-select" hidden></select>
+    </div>
+    <textarea id="text-input">It was the kind of morning she would later struggle to remember, grey and quiet, with the river moving slowly under the bridge. Extraordinary things rarely announce themselves. "Are you coming?" her brother asked. She did not answer at first.</textarea>
+    <div class="row">
+      <button id="read-button" type="button">Read</button>
+      <span>Changing the speed restarts from the beginning (that is how OpenSpritz works).</span>
+    </div>
+  </div>
+
+  <!-- Our EPUB reader from the speed_reader project, then the original OpenSpritz -->
+  <script src="../epub.js"></script>
+  <script src="spritz.js"></script>
+  <script>
+    const textInput = document.getElementById("text-input");
+    const epubInput = document.getElementById("epub-input");
+    const chapterSelect = document.getElementById("chapter-select");
+    let chapters = [];
+
+    // Starts OpenSpritz on the text box contents
+    function startReading() {
+      clearTimeouts(); // OpenSpritz helper: stops any reading in progress
+
+      // spritzify adds a new click handler to the Pause button every time it runs,
+      // and two handlers cancel each other out. Swapping in a fresh copy of the
+      // button removes the old handlers.
+      const oldButton = document.getElementById("spritz_toggle");
+      oldButton.replaceWith(oldButton.cloneNode(true));
+
+      spritzify(textInput.value);
+    }
+
+    // Opens an EPUB with our epub.js and lists its chapters
+    async function openEpub(file) {
+      const book = await loadEpub(file);
+      chapters = book.chapters;
+      chapterSelect.innerHTML = "";
+      chapters.forEach((chapter, i) => chapterSelect.add(new Option(chapter.title, i)));
+      chapterSelect.hidden = false;
+      showChapter(0);
+    }
+
+    // Puts one chapter's text into the text box
+    function showChapter(index) {
+      textInput.value = chapters[index].paragraphs.join("\n\n");
+    }
+
+    document.getElementById("read-button").addEventListener("click", startReading);
+    document.getElementById("spritz_selector").addEventListener("change", startReading);
+    epubInput.addEventListener("change", () => epubInput.files[0] && openEpub(epubInput.files[0]));
+    chapterSelect.addEventListener("change", () => showChapter(Number(chapterSelect.value)));
+  </script>
+</body>
+</html>
