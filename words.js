@@ -66,25 +66,25 @@ function splitAtFocus(word) {
 // average speed matches the slider; see chapterSpeedScale).
 
 const TIMING_MODES = {
-  ours: oursTiming,
-  openspritz: openSpritzTiming,
+  custom: customTiming,
+  flat: flatTiming,
 };
 
 function wordTiming(word, mode) {
   return TIMING_MODES[mode](word);
 }
 
-// Our method: a little extra per letter for long words,
-// times an extra for punctuation. Both extras can apply at once.
-function oursTiming(word) {
+// "Custom": a little extra per letter for long words (set by the
+// Long words slider), times an extra for punctuation. Both can apply at once.
+function customTiming(word) {
   return { show: lengthMultiplier(word.text) * punctuationMultiplier(word), blank: 0 };
 }
 
-// OpenSpritz's method, copied from its spritz.js:
-// long words (over 8 characters) or words with , : - ( are shown 3 beats
+// "Flat": OpenSpritz's method, copied from its spritz.js.
+// Long words (over 8 characters) or words with , : - ( are shown 3 beats
 // (unless they contain a full stop), and after . ! ? : ; ) the screen
 // goes blank for 3 beats
-function openSpritzTiming(word) {
+function flatTiming(word) {
   const text = word.text;
   let show = 1;
   let blank = 0;

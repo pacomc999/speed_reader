@@ -29,17 +29,18 @@
         <input id="speed-slider" type="range" min="100" max="1000" step="25" value="300">
         <span id="speed-value">300 wpm</span>
       </label>
-      <label class="speed" title="Extra time for each letter past 5 (Ours timing only)">
-        Long words
-        <input id="long-word-slider" type="range" min="0" max="30" step="1" value="12">
-        <span id="long-word-value">+12%</span>
-      </label>
       <label class="timing">
         Timing
         <select id="timing-select">
-          <option value="ours">Ours</option>
-          <option value="openspritz">OpenSpritz</option>
+          <option value="custom">Custom</option>
+          <option value="flat">Flat</option>
         </select>
+      </label>
+      <!-- Only shown with Custom timing -->
+      <label id="long-word-control" class="speed" title="Extra time for each letter past 5">
+        Long words
+        <input id="long-word-slider" type="range" min="0" max="30" step="1" value="12">
+        <span id="long-word-value">+12%</span>
       </label>
       <button id="context-toggle" type="button" aria-pressed="false">Context: off</button>
       <button id="open-another" type="button">Open another book</button>
@@ -56,7 +57,8 @@
         <div class="guide"></div>
       </div>
       <div id="peek-view" class="peek-view">
-        <p id="peek-text" class="peek-text"></p>
+        <!-- The whole chapter, scrollable, filled in by reader.js -->
+        <div id="peek-text" class="peek-text"></div>
         <p id="peek-hint" class="hint"></p>
       </div>
     </main>
@@ -66,7 +68,7 @@
       <div class="progress"><div id="progress-fill" class="progress-fill"></div></div>
       <p id="status" class="status"></p>
       <p class="keys">
-        Space: play or pause · Left and Right: jump back or forward · Shift + Left: back a sentence · Up and Down: speed · C: context words · T: timing
+        Space: play or pause · Left and Right: jump back or forward · Shift + Left: back a sentence · Up and Down: speed
       </p>
     </footer>
   </section>

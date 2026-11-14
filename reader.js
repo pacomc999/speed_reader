@@ -25,6 +25,7 @@ const el = {
   contextRight: document.getElementById("context-right"),
   contextToggle: document.getElementById("context-toggle"),
   timingSelect: document.getElementById("timing-select"),
+  longWordControl: document.getElementById("long-word-control"),
   longWordSlider: document.getElementById("long-word-slider"),
   longWordValue: document.getElementById("long-word-value"),
   peekView: document.getElementById("peek-view"),
@@ -46,7 +47,7 @@ const state = {
   playing: false,
   timer: null,
   showContext: false,  // show the previous and next word, dimmed
-  timingMode: "ours",  // "ours" or "openspritz" (see words.js)
+  timingMode: "custom", // "custom" or "flat" (see words.js)
   speedScale: 1,       // shrinks beats so the real speed matches the slider
 };
 
@@ -252,22 +253,49 @@ function neighbourText(direction) {
   return neighbour.text;
 }
 
-// Shows the whole paragraph around the current word, with it highlighted.
-// Clicking any word in the paragraph jumps there.
-function renderPeek() {
-  const current = state.words[state.index];
+// The paused view shows the whole chapter as scrollable text.
+// It is built once per chapter (that can be thousands of words);
+// after that only the highlight moves.
+const peek = {
+  builtFor: null,    // the words list the text was built from
+  spans: [],         // one <span> per word, same order as state.words
+  highlighted: null, // the span that is currently highlighted
+};
+
+// Creates one <p> per paragraph and one <span> per word
+function buildPeekText() {
   el.peekText.innerHTML = "";
+  peek.spans = [];
+  let paragraph = null;
 
   state.words.forEach((word, i) => {
-    if (word.paragraphIndex !== current.paragraphIndex) return;
+    const startsParagraph = i === 0 || word.paragraphIndex !== state.words[i - 1].paragraphIndex;
+    if (startsParagraph) {
+      paragraph = document.createElement("p");
+      el.peekText.appendChild(paragraph);
+    }
     const span = document.createElement("span");
     span.textContent = word.text;
-    span.dataset.index = i;
-    if (i === state.index) span.className = "current";
-    el.peekText.append(span, " ");
+    span.dataset.index = i; // lets a click know which word it was
+    paragraph.append(span, " ");
+    peek.spans.push(span);
   });
 
-  el.peekHint.textContent = "Press Space to read from the highlighted word";
+  peek.builtFor = state.words;
+  peek.highlighted = null;
+}
+
+// Highlights the current word and scrolls it to the middle.
+// Clicking any word jumps there.
+function renderPeek() {
+  if (peek.builtFor !== state.words) buildPeekText();
+
+  if (peek.highlighted) peek.highlighted.classList.remove("current");
+  peek.highlighted = peek.spans[state.index];
+  peek.highlighted.classList.add("current");
+  peek.highlighted.scrollIntoView({ block: "center" });
+
+  el.peekHint.textContent = "Scroll or click a word, then press Space to read from the highlighted word";
 }
 
 // Progress bar and "time left" line
@@ -346,6 +374,9 @@ el.stage.addEventListener("click", (event) => {
     render();
     return;
   }
+  // Clicks on the text between words do nothing, so scrolling
+  // and clicking around never starts reading by accident
+  if (el.peekText.contains(event.target)) return;
   togglePlay();
 });
 
@@ -397,10 +428,15 @@ setShowContext(loadShowContext());
 
 const TIMING_SETTING_KEY = "speed_reader:timingMode";
 
+// Earlier versions saved the modes under other names
+const OLD_TIMING_NAMES = { ours: "custom", openspritz: "flat" };
+
 function setTimingMode(mode) {
-  if (!TIMING_MODES[mode]) mode = "ours"; // ignore unknown saved values
+  mode = OLD_TIMING_NAMES[mode] || mode;
+  if (!TIMING_MODES[mode]) mode = "custom"; // ignore unknown saved values
   state.timingMode = mode;
   el.timingSelect.value = mode;
+  el.longWordControl.hidden = mode !== "custom"; // the slider only matters for Custom
   try {
     localStorage.setItem(TIMING_SETTING_KEY, mode);
   } catch (error) {
@@ -415,9 +451,9 @@ function setTimingMode(mode) {
 
 function loadTimingMode() {
   try {
-    return localStorage.getItem(TIMING_SETTING_KEY) || "ours";
+    return localStorage.getItem(TIMING_SETTING_KEY) || "custom";
   } catch (error) {
-    return "ours";
+    return "custom";
   }
 }
 
@@ -430,7 +466,7 @@ setTimingMode(loadTimingMode());
 
 
 // ---------- Long words slider ----------
-// Extra time per letter past 5, in percent (only used by "Ours" timing)
+// Extra time per letter past 5, in percent (only used by "Custom" timing)
 
 const LONG_WORD_SETTING_KEY = "speed_reader:longWordPercent";
 const DEFAULT_LONG_WORD_PERCENT = 12;
@@ -505,9 +541,5 @@ document.addEventListener("keydown", (event) => {
   } else if (event.key === "ArrowDown") {
     event.preventDefault();
     setSpeed(state.wordsPerMinute - SPEED_STEP);
-  } else if (event.key.toLowerCase() === "c" && !event.ctrlKey && !event.metaKey) {
-    setShowContext(!state.showContext);
-  } else if (event.key.toLowerCase() === "t" && !event.ctrlKey && !event.metaKey) {
-    setTimingMode(state.timingMode === "ours" ? "openspritz" : "ours");
   }
 });

@@ -8,8 +8,9 @@ Read EPUB books one word at a time. Each word flashes in the same spot with one 
 
 - Open any EPUB file (drag it onto the page or click to choose)
 - Speed from 100 to 1000 words per minute, and the number is your real average speed
-- Longer pauses on punctuation, and a "Long words" slider for extra time on long words
-- Two timing styles to compare: our smooth timing, or the flat timing of OpenSpritz
+- Two timing styles:
+  - **Custom**: longer pauses on punctuation, plus a "Long words" slider for extra time on long words
+  - **Flat**: the timing of OpenSpritz (long words and commas 3 beats, a blank screen after sentences)
 - Optional context words (the previous and next word, dimmed)
 - Remembers your book, your place and your settings in the browser
 
@@ -21,8 +22,6 @@ Read EPUB books one word at a time. Each word flashes in the same spot with one 
 | Left / Right | Jump back or forward |
 | Shift + Left | Back to the start of the sentence |
 | Up / Down | Change speed |
-| C | Context words on or off |
-| T | Switch timing style |
 
 When paused, the whole paragraph is shown and you can click any word to jump there.
 

@@ -10,6 +10,9 @@
 
 * { box-sizing: border-box; }
 
+/* "hidden" always wins, even over display: flex below */
+[hidden] { display: none !important; }
+
 body {
   margin: 0;
   background: var(--background);
@@ -162,23 +165,43 @@ input[type="range"] { accent-color: var(--accent); }
 #context-toggle[aria-pressed="true"] { border-color: var(--accent); }
 
 
-/* ---------- Paused view: the whole paragraph ---------- */
-.peek-view { max-width: 720px; }
+/* ---------- Paused view: the whole chapter, scrollable ---------- */
+
+/* The reading screen is exactly one window tall, so the chapter text
+   scrolls inside the middle area instead of making the page longer */
+#reader-screen { height: 100vh; }
+.stage { min-height: 0; }
+
+.peek-view {
+  width: 100%;
+  max-width: 720px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
 
 .peek-text {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 8px;
   font-family: Georgia, "Times New Roman", serif;
   font-size: 20px;
   line-height: 1.7;
   color: #b5b5b5;
+  scrollbar-color: var(--faint) transparent; /* dark scrollbar */
 }
+
+.peek-text p { margin: 0 0 1em; }
 
 .peek-text span { cursor: pointer; border-radius: 3px; }
 .peek-text span:hover { color: var(--text); }
 
+/* The red edge is a shadow, not padding, so moving the highlight
+   never pushes the surrounding text around */
 .peek-text .current {
   background: var(--accent);
   color: #fff;
-  padding: 0 3px;
+  box-shadow: 0 0 0 3px var(--accent);
 }
 
 .hint { color: var(--muted); text-align: center; }
