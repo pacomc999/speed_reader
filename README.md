@@ -31,7 +31,7 @@ Books are chosen from the Files app (iCloud Drive, downloads, etc.). Books bough
 | Shift + Left | Back to the start of the sentence |
 | Up / Down | Change speed |
 
-When paused, the word stays frozen and the chapter text appears below it. Click (or tap) any word there to jump to it. On a phone, tap the word to play or pause, and the controls are behind the **Settings** button.
+When paused, the word stays frozen and the chapter text appears below it. Click (or tap) any word there to jump to it. On a phone, tap the word to play or pause, tap **left** of it to go back (a sentence while reading, a word while paused) and **right** of it to go forward. The other controls are behind the **Settings** button.
 
 ## Files
 

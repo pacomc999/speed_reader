@@ -216,6 +216,45 @@ function backOneSentence() {
   jumpTo(previousSentenceStart(state.words, state.index));
 }
 
+
+// ---------- Touch: tap left or right of the word ----------
+// While reading: back to the start of the sentence / on to the next one.
+// While paused: one word back / forward.
+
+function tapBack() {
+  if (state.playing) backOneSentence();
+  else jumpTo(state.index - 1);
+}
+
+function tapForward() {
+  if (state.playing) jumpTo(nextSentenceStart(state.words, state.index));
+  else jumpTo(state.index + 1);
+}
+
+// Extra room around the word that still counts as "on the word"
+const WORD_TAP_MARGIN = 24;
+
+// The outer part of the screen on each side is always back / forward,
+// even when a very long word reaches into it
+const EDGE_ZONE = 0.2; // 20% of the screen width on each side
+
+// Says whether a tap at this x position was "left" of the word,
+// "right" of it, or "on" it, measured from the word's real edges
+function tapSide(x) {
+  const firstPart = el.wordBefore.textContent ? el.wordBefore : el.wordFocus;
+  const lastPart = el.wordAfter.textContent ? el.wordAfter : el.wordFocus;
+  const screenWidth = window.innerWidth;
+
+  const wordLeft = firstPart.getBoundingClientRect().left - WORD_TAP_MARGIN;
+  const wordRight = lastPart.getBoundingClientRect().right + WORD_TAP_MARGIN;
+  const left = Math.max(wordLeft, screenWidth * EDGE_ZONE);
+  const right = Math.min(wordRight, screenWidth * (1 - EDGE_ZONE));
+
+  if (x < left) return "left";
+  if (x > right) return "right";
+  return "on";
+}
+
 function setSpeed(wordsPerMinute) {
   state.wordsPerMinute = Math.min(1000, Math.max(100, wordsPerMinute));
   el.speedSlider.value = state.wordsPerMinute;
@@ -229,7 +268,7 @@ function setSpeed(wordsPerMinute) {
 
 // Touch screens have no Space key, so the hint says "tap" there
 const IS_TOUCH_SCREEN = window.matchMedia("(hover: none)").matches;
-const PAUSED_HINT = IS_TOUCH_SCREEN ? "Paused · tap the word to continue" : "Paused · Space to continue";
+const PAUSED_HINT = IS_TOUCH_SCREEN ? "‹ back · tap the word to play · forward ›" : "Paused · Space to continue";
 
 // Reading: just the flashing word.
 // Paused: the word stays frozen in place, and the chapter text
@@ -390,6 +429,13 @@ el.stage.addEventListener("click", (event) => {
   // Clicks on the text between words do nothing, so scrolling
   // and clicking around never starts reading by accident
   if (el.peekText.contains(event.target)) return;
+
+  // On touch screens, tapping beside the word moves back or forward
+  if (IS_TOUCH_SCREEN) {
+    const side = tapSide(event.clientX);
+    if (side === "left") return tapBack();
+    if (side === "right") return tapForward();
+  }
   togglePlay();
 });
 

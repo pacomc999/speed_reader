@@ -141,6 +141,13 @@ function previousSentenceStart(words, index) {
   return sentenceStart(words, index - 1); // already at a start, go one back
 }
 
+// Finds where the next sentence starts (or the last word of the chapter)
+function nextSentenceStart(words, index) {
+  let i = index;
+  while (i < words.length - 1 && !endsSentence(words[i])) i++;
+  return Math.min(i + 1, words.length - 1);
+}
+
 // Walks backwards until the word before ends a sentence
 function sentenceStart(words, index) {
   let i = index;
