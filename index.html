@@ -27,6 +27,29 @@
       <input id="file-input" type="file" hidden>
       <span>Choose an EPUB file, or drop it here</span>
     </label>
+
+    <!-- Or read a web page: a form, so the keyboard's Go / Enter key works -->
+    <form id="link-form" class="start-option">
+      <label for="link-input">Or read a web page</label>
+      <div class="start-row">
+        <!-- type "text" (not "url") so links without https:// are accepted too;
+             inputmode="url" still gives phones the web address keyboard -->
+        <input id="link-input" type="text" inputmode="url" placeholder="Paste a link"
+               autocomplete="off" autocapitalize="off" spellcheck="false" required>
+        <button type="submit">Read</button>
+      </div>
+      <p class="start-note">Pages are fetched through Jina Reader (r.jina.ai).</p>
+    </form>
+
+    <!-- Or paste text: details/summary opens and closes with no JavaScript -->
+    <details class="start-option">
+      <summary>Or paste some text</summary>
+      <form id="paste-form">
+        <textarea id="paste-input" rows="6" placeholder="Paste the text here" required></textarea>
+        <button type="submit">Read</button>
+      </form>
+    </details>
+
     <p id="start-message" class="message"></p>
   </section>
 
@@ -94,6 +117,7 @@
 
   <!-- Scripts load in this order: helpers first, the app last -->
   <script src="epub.js"></script>
+  <script src="article.js"></script>
   <script src="words.js"></script>
   <script src="storage.js"></script>
   <script src="reader.js"></script>

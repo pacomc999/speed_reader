@@ -59,10 +59,14 @@ const SAVE_EVERY = 20; // save progress every this many words
 
 // ---------- Opening a book ----------
 
+// Web pages and pasted text are kept as plain text files ending in .txt
+// (see openText), so they can be saved and reopened just like a book
+const TEXT_FILE_ENDING = ".txt";
+
 async function openBook(file) {
   el.startMessage.textContent = "Opening " + file.name + "...";
   try {
-    state.book = await loadEpub(file);
+    state.book = await readBookFile(file);
   } catch (error) {
     el.startMessage.textContent = error.message;
     return;
@@ -84,6 +88,34 @@ async function openBook(file) {
 
   el.startScreen.hidden = true;
   el.readerScreen.hidden = false;
+}
+
+// Plain text becomes a one chapter book; anything else is read as an EPUB
+async function readBookFile(file) {
+  if (file.type === "text/plain") {
+    const title = file.name.replace(/\.txt$/, "");
+    return textToBook(title, await file.text());
+  }
+  return loadEpub(file);
+}
+
+// Wraps text in a file, so it goes through openBook like an EPUB
+// (which also saves it for next time)
+function openText(title, text) {
+  const file = new File([text], title + TEXT_FILE_ENDING, { type: "text/plain" });
+  return openBook(file);
+}
+
+// Fetches a web page's article and opens it
+async function openWebPage(link) {
+  const url = normaliseLink(link);
+  el.startMessage.textContent = "Fetching the page...";
+  try {
+    const page = await loadWebPage(url);
+    await openText(page.title, page.text);
+  } catch (error) {
+    el.startMessage.textContent = error.message;
+  }
 }
 
 // Puts every chapter into the dropdown
@@ -437,6 +469,19 @@ el.stage.addEventListener("click", (event) => {
     if (side === "right") return tapForward();
   }
   togglePlay();
+});
+
+// Web page link: the form's Read button (or the keyboard's Go key)
+document.getElementById("link-form").addEventListener("submit", (event) => {
+  event.preventDefault(); // stay on this page instead of sending the form
+  openWebPage(document.getElementById("link-input").value);
+});
+
+// Pasted text
+document.getElementById("paste-form").addEventListener("submit", (event) => {
+  event.preventDefault();
+  const text = document.getElementById("paste-input").value;
+  openText(titleFromText(text), text);
 });
 
 el.chapterSelect.addEventListener("change", () => {

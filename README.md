@@ -15,6 +15,7 @@ Books are chosen from the Files app (iCloud Drive, downloads, etc.). Books bough
 ## Features
 
 - Open any EPUB file (drag it onto the page or click to choose)
+- Or read a web page: paste its link, and the article text is fetched through [Jina Reader](https://jina.ai/reader) (free, about 20 pages a minute). Or paste text directly.
 - Speed from 100 to 1000 words per minute, and the number is your real average speed
 - Two timing styles:
   - **Custom**: longer pauses on punctuation, plus a "Long words" slider for extra time on long words
@@ -39,6 +40,7 @@ When paused, the word stays frozen and the chapter text appears below it. Click 
 - `reader.js`: playing, pausing, keys, saving your place
 - `words.js`: focus letter and timing rules
 - `epub.js`: reads EPUB files (with a tiny built in unzipper, no libraries)
+- `article.js`: fetches web pages through Jina Reader and turns text into paragraphs
 - `storage.js`: keeps a copy of the last book in the browser
 - `manifest.webmanifest`, `icons/`: web app name and icons (for Add to Home Screen)
 - `sw.js`: service worker, keeps the app on the device so it works offline

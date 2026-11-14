@@ -6,7 +6,7 @@
 // (so updates show up straight away) and refresh the saved copy.
 // When offline, use the saved copy instead.
 
-const CACHE_NAME = "speed-reader-v1";
+const CACHE_NAME = "speed-reader-v2";
 
 // Everything the app needs to start
 const APP_FILES = [
@@ -14,6 +14,7 @@ const APP_FILES = [
   "index.html",
   "style.css",
   "epub.js",
+  "article.js",
   "words.js",
   "storage.js",
   "reader.js",
@@ -44,6 +45,9 @@ self.addEventListener("activate", (event) => {
 // Every file request: try the internet first, fall back to the saved copy
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
+  // Only the app's own files. Web pages fetched through Jina Reader are
+  // left alone (the open article is already saved with the last book).
+  if (new URL(event.request.url).origin !== self.location.origin) return;
 
   event.respondWith(
     fetch(event.request)

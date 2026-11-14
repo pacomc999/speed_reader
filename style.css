@@ -62,6 +62,35 @@ h1 { font-weight: 500; letter-spacing: 1px; }
 
 .message { color: var(--accent); min-height: 1.2em; }
 
+/* Web page link and pasted text, under the EPUB box */
+.start-option {
+  width: min(520px, 100%);
+  color: var(--muted);
+}
+.start-option label,
+.start-option summary { display: block; margin-bottom: 8px; cursor: pointer; }
+
+.start-row { display: flex; gap: 8px; }
+
+.start-option input,
+.start-option textarea {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  background: var(--background);
+  color: var(--text);
+  border: 1px solid var(--faint);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font: inherit;
+  font-size: 16px; /* 16px or more stops iPhones zooming in on the field */
+}
+.start-option textarea { resize: vertical; display: block; margin-bottom: 8px; }
+.start-option input:focus,
+.start-option textarea:focus { outline: none; border-color: var(--accent); }
+
+.start-note { font-size: 12px; color: #5c5c5c; margin: 6px 0 0; }
+
 
 /* ---------- Top toolbar ---------- */
 .toolbar {
