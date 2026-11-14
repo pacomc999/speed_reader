@@ -2,8 +2,19 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- viewport-fit=cover lets the app use the whole iPhone screen (around the notch) -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Speed Reader</title>
+
+  <!-- Web app setup: name, icon, and full screen when added to the home screen -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Speed Reader">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#121212">
+
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,8 +23,9 @@
   <section id="start-screen" class="screen">
     <h1>Speed Reader</h1>
     <label id="drop-zone" class="drop-zone">
-      <input id="file-input" type="file" accept=".epub,application/epub+zip" hidden>
-      <span>Drop an EPUB file here, or click to choose one</span>
+      <!-- No "accept" filter: some iPhones grey out EPUB files when one is set -->
+      <input id="file-input" type="file" hidden>
+      <span>Choose an EPUB file, or drop it here</span>
     </label>
     <p id="start-message" class="message"></p>
   </section>
@@ -21,32 +33,37 @@
   <!-- Screen 2: reading -->
   <section id="reader-screen" class="screen" hidden>
 
-    <!-- Top bar: book, chapter and speed controls -->
+    <!-- Top bar: book title, and the controls.
+         On phones the controls hide behind the Settings button. -->
     <header id="toolbar" class="toolbar">
       <span id="book-title" class="book-title"></span>
-      <select id="chapter-select" aria-label="Chapter"></select>
-      <label class="speed">
-        <input id="speed-slider" type="range" min="100" max="1000" step="25" value="300">
-        <span id="speed-value">300 wpm</span>
-      </label>
-      <label class="timing">
-        Timing
-        <select id="timing-select">
-          <option value="custom">Custom</option>
-          <option value="flat">Flat</option>
-        </select>
-      </label>
-      <!-- Only shown with Custom timing -->
-      <label id="long-word-control" class="speed" title="Extra time for each letter past 5">
-        Long words
-        <input id="long-word-slider" type="range" min="0" max="30" step="1" value="12">
-        <span id="long-word-value">+12%</span>
-      </label>
-      <button id="context-toggle" type="button" aria-pressed="false">Context: off</button>
-      <button id="open-another" type="button">Open another book</button>
+      <button id="settings-toggle" class="settings-toggle" type="button" aria-expanded="false">Settings</button>
+
+      <div id="settings-panel" class="settings-panel">
+        <select id="chapter-select" aria-label="Chapter"></select>
+        <label class="speed">
+          <input id="speed-slider" type="range" min="100" max="1000" step="25" value="300">
+          <span id="speed-value">300 wpm</span>
+        </label>
+        <label class="timing">
+          Timing
+          <select id="timing-select">
+            <option value="custom">Custom</option>
+            <option value="flat">Flat</option>
+          </select>
+        </label>
+        <!-- Only shown with Custom timing -->
+        <label id="long-word-control" class="speed" title="Extra time for each letter past 5">
+          Long words
+          <input id="long-word-slider" type="range" min="0" max="30" step="1" value="12">
+          <span id="long-word-value">+12%</span>
+        </label>
+        <button id="context-toggle" type="button" aria-pressed="false">Context: off</button>
+        <button id="open-another" type="button">Open another book</button>
+      </div>
     </header>
 
-    <!-- Middle: the flashing word, or the paragraph when paused -->
+    <!-- Middle: the flashing word, and the chapter text when paused -->
     <main id="stage" class="stage">
       <div id="word-view" class="word-view">
         <div class="guide"></div>
@@ -55,7 +72,7 @@
           <span class="before"><span id="context-left" class="context"></span><span id="word-before"></span></span><span id="word-focus" class="focus"></span><span class="after"><span id="word-after"></span><span id="context-right" class="context"></span></span>
         </div>
         <div class="guide"></div>
-        <!-- Shown when paused: how to continue or see the text -->
+        <!-- Shown when paused: how to continue -->
         <p id="word-hint" class="hint word-hint"></p>
       </div>
       <div id="peek-view" class="peek-view">
@@ -65,7 +82,7 @@
       </div>
     </main>
 
-    <!-- Bottom: progress and keyboard help -->
+    <!-- Bottom: progress and keyboard help (the help is hidden on touch screens) -->
     <footer class="footer">
       <div class="progress"><div id="progress-fill" class="progress-fill"></div></div>
       <p id="status" class="status"></p>

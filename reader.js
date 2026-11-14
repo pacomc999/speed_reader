@@ -31,6 +31,8 @@ const el = {
   peekView: document.getElementById("peek-view"),
   peekText: document.getElementById("peek-text"),
   wordHint: document.getElementById("word-hint"),
+  toolbar: document.getElementById("toolbar"),
+  settingsToggle: document.getElementById("settings-toggle"),
   progressFill: document.getElementById("progress-fill"),
   status: document.getElementById("status"),
 };
@@ -120,6 +122,7 @@ function backToStart() {
 function play() {
   if (state.playing) return;
   state.playing = true;
+  setSettingsOpen(false); // the phone settings panel closes when reading starts
   render();
   scheduleNextWord();
 }
@@ -224,6 +227,10 @@ function setSpeed(wordsPerMinute) {
 
 // ---------- Drawing the screen ----------
 
+// Touch screens have no Space key, so the hint says "tap" there
+const IS_TOUCH_SCREEN = window.matchMedia("(hover: none)").matches;
+const PAUSED_HINT = IS_TOUCH_SCREEN ? "Paused · tap the word to continue" : "Paused · Space to continue";
+
 // Reading: just the flashing word.
 // Paused: the word stays frozen in place, and the chapter text
 // appears underneath it (scrollable, current word highlighted).
@@ -234,7 +241,7 @@ function render() {
   renderWord();
   if (!state.playing) renderPeek();
 
-  el.wordHint.textContent = state.playing ? "" : "Paused · Space to continue";
+  el.wordHint.textContent = state.playing ? "" : PAUSED_HINT;
   renderStatus();
 }
 
@@ -508,6 +515,32 @@ el.longWordSlider.addEventListener("input", () => setLongWordPercent(Number(el.l
 el.longWordSlider.addEventListener("change", () => el.longWordSlider.blur());
 
 setLongWordPercent(loadLongWordPercent());
+
+
+// ---------- Settings button (phones only, see style.css) ----------
+
+function setSettingsOpen(isOpen) {
+  el.toolbar.classList.toggle("settings-open", isOpen);
+  el.settingsToggle.setAttribute("aria-expanded", isOpen);
+}
+
+el.settingsToggle.addEventListener("click", () => {
+  const isOpen = el.toolbar.classList.contains("settings-open");
+  if (!isOpen) pause(); // no reading while changing settings
+  setSettingsOpen(!isOpen);
+  el.settingsToggle.blur();
+});
+
+
+// ---------- Offline support (web app) ----------
+// Registers sw.js, which keeps a copy of the app on the device.
+// Only works on a real web address, not when opening the file directly.
+
+if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+  navigator.serviceWorker.register("sw.js").catch(() => {
+    // Not fatal: the app still works, just not offline
+  });
+}
 
 
 // ---------- On page load: reopen the last book ----------
